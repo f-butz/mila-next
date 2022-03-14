@@ -1,26 +1,37 @@
-const stripe = require('stripe')('sk_test_7vkO11bNgkcywcTqo3mwUC3Y00fK5Yg5vn');
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 import { buffer } from "micro";
+import Cors from 'micro-cors';
 
-const signingSecret = 'whsec_ac56d1880946bf787da6a833692aac5b2ca79a44b4bd935f8c7e6301748960bf';
+const cors = Cors({
+  allowMethods: ['POST', 'HEAD'],
+});
+
+const signingSecret = process.env.STRIPE_SIGNING_SECRET;
 export const config = { api: { bodyParser: false } };
 
 const handler = async (req, res) => {
-  const signature = req.headers["stripe-signature"];
-  const reqBuffer = await buffer(req);
+  if (req.method === "POST") {
+    const signature = req.headers["stripe-signature"];
+    const reqBuffer = await buffer(req);
 
-  let event;
+    let event;
 
-  try {
-    event = stripe.webhooks.constructEvent(reqBuffer, signature, signingSecret);
-    console.log({ event });
-  } catch (error) {
-    console.log(error);
-    return res.status(400).send(`Webhook error: ${error.message}`);
+    try {
+      event = stripe.webhooks.constructEvent(
+        reqBuffer.toString(),
+        signature,
+        signingSecret
+      );
+      console.log({ event });
+    } catch (error) {
+      console.log(error);
+      return res.status(400).send(`Webhook error: ${error.message}`);
+    }
+
+    console.log(JSON.stringify(event.data));
+
+    res.json({ recieved: true });
   }
+};
 
-  console.log(JSON.stringify(event.data))
-
-  res.send({ recieved: true });
-}
-
-export default handler
+export default cors(handler);
