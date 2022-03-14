@@ -1,8 +1,7 @@
-const Stripe = require("stripe");
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 import { buffer } from "micro";
 
 const signingSecret = process.env.STRIPE_SIGNING_SECRET;
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export const config = { api: { bodyParser: false } };
 
 const handler = async (req, res) => {
