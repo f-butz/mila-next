@@ -32,6 +32,8 @@ const handler = async (req, res) => {
       const session = stripeEvent.data.object;
       console.log("payment success", session);
       // Do something here on payment success, like update order etc.
+      res.status(200).send(session)
+
     }
 
     res.json({ received: true });
