@@ -1,46 +1,63 @@
 import { buffer } from "micro";
+import Cors from "micro-cors";
+
 const Stripe = require("stripe");
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2020-08-27",
+const cors = Cors({
+  allowMethods: ["POST", "HEAD"],
 });
 
-const webhookSecret = process.env.STRIPE_SIGNING_SECRET;
+let stripe = Stripe("sk_test_7vkO11bNgkcywcTqo3mwUC3Y00fK5Yg5vn");
 
+const webhookSecret =
+  "whsec_ac56d1880946bf787da6a833692aac5b2ca79a44b4bd935f8c7e6301748960bf";
+
+// Stripe requires the raw body to construct the event.
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
-const handler = async (req, res) => {
+const webhookHandler = async (req, res) => {
   if (req.method === "POST") {
     const buf = await buffer(req);
     const sig = req.headers["stripe-signature"];
 
-    let stripeEvent;
+    let event;
 
     try {
-      stripeEvent = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
-      console.log("stripeEvent", stripeEvent);
+      event = stripe.webhooks.constructEvent(
+        buf.toString(),
+        sig,
+        webhookSecret
+      );
     } catch (err) {
+      // On error, log and return the error message
+      console.log(`❌ Error message: ${err.message}`);
       res.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
 
-    if ("checkout.session.completed" === stripeEvent.type) {
-      const session = stripeEvent.data.object;
-      console.log("payment success", session);
-      // Do something here on payment success, like update order etc.
-      res.status(200).send(session)
-
+    // Handle the event
+    switch (event.type) {
+      case "customer.subscription.created":
+        const subscription = event.data.object;
+        const customer = await stripe.customers.retrieve(
+          subscription.customer
+        );
+        const { email, name } = customer
+        console.log("CUSTOMER:", email)
+        console.log("SUB:", subscription.plan)
+        break;
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
 
-    res.json({ received: true });
-  } else {
-    res.setHeader("Allow", "POST");
-    res.status(405).end("Method Not Allowed");
+
+    // Successfully constructed event
+    res.status(200).send("✅ Success:", event.id);
   }
 };
 
-export default handler;
+export default cors(webhookHandler);
