@@ -61,7 +61,7 @@ const webhookHandler = async (req, res) => {
 
         const message = {
           from_email: "noreply@ruoka.app",
-          from_name: "Shapeschool",
+          from_name: "Mila by Ruoka",
           subject: "Dein Aktivierungscode für Mila",
           html: `<p>Hallo ${name},</p>
                 <p>wir freuen uns, dass du dich für Mila entschieden hast.</p>
