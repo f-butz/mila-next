@@ -10,7 +10,7 @@ const cors = Cors({
 let stripe = Stripe("sk_test_7vkO11bNgkcywcTqo3mwUC3Y00fK5Yg5vn");
 
 const webhookSecret =
-  "whsec_U6jh96gqd1LCPkvUuemfqcPUxvWeedar";
+  "whsec_KvVgfiiVt5qzFADkLazZyBJ5hhYeX89d";
 
 // Stripe requires the raw body to construct the event.
 export const config = {
