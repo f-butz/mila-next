@@ -1,11 +1,18 @@
+
 import { buffer } from "micro";
 import Cors from "micro-cors";
+import ShortUniqueId from 'short-unique-id';
 
 const Stripe = require("stripe");
+const mailchimp = require("@mailchimp/mailchimp_transactional")(
+  "6I8EXhaRJFWbKjha7-Ja0w"
+)
 
 const cors = Cors({
   allowMethods: ["POST", "HEAD"],
 });
+
+const uid = new ShortUniqueId({ length: 10 });
 
 let stripe = Stripe("sk_test_7vkO11bNgkcywcTqo3mwUC3Y00fK5Yg5vn");
 
@@ -49,6 +56,36 @@ const webhookHandler = async (req, res) => {
         const { email, name } = customer
         console.log("CUSTOMER:", email)
         console.log("SUB:", subscription.plan)
+
+        const code = uid()
+
+        const message = {
+          from_email: "noreply@ruoka.app",
+          from_name: "Shapeschool",
+          subject: "Dein Aktivierungscode für Mila",
+          html: `<p>Hallo ${name},</p>
+                <p>wir freuen uns, dass du dich für Mila entschieden hast.</p>
+                <p>Mit folgendem Code erhältst du Zugang zu allen Features der App:</p>
+                <p><strong>${code}</strong></p>
+                <p>Liebe Grüße<br/>
+                Dein Team von Mila </p>
+        `,
+          to: [
+            {
+              email: values.email,
+              type: "to",
+            },
+          ],
+        }
+
+        const response = await mailchimp.messages
+          .send({
+            message,
+          })
+          .catch(e => console.log(e))
+          .then(res => {
+            console.log(res)
+          })
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);
