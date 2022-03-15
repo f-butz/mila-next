@@ -72,7 +72,7 @@ const webhookHandler = async (req, res) => {
         `,
           to: [
             {
-              email: values.email,
+              email: email,
               type: "to",
             },
           ],
