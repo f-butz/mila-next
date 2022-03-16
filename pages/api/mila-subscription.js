@@ -66,8 +66,9 @@ const webhookHandler = async (req, res) => {
                 <p>wir freuen uns, dass du dich für Mila entschieden hast.</p>
                 <p>Mit folgendem Code erhältst du Zugang zu allen Features der App:</p>
                 <p><strong>${code}</strong></p>
+                <p>Für Fragen stehen wir dir jederzeit zur Verfügung.</p>
                 <p>Liebe Grüße<br/>
-                Dein Team von Mila </p>
+                Dein Team Mila </p>
         `,
           to: [
             {
