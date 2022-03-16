@@ -14,10 +14,9 @@ const cors = Cors({
 
 const uid = new ShortUniqueId({ length: 10 });
 
-let stripe = Stripe("sk_test_7vkO11bNgkcywcTqo3mwUC3Y00fK5Yg5vn");
+let stripe = Stripe(process.env.STRIPE_SECRET_KEY_PROD);
 
-const webhookSecret =
-  "whsec_KvVgfiiVt5qzFADkLazZyBJ5hhYeX89d";
+const webhookSecret = process.env.STRIPE_SIGNING_SECRET_PROD;
 
 // Stripe requires the raw body to construct the event.
 export const config = {
